@@ -1,0 +1,72 @@
+:root {
+    --white: #F8F7F6;
+    --tan: #C9AB99;
+    --red: #D54C2D;
+    --grey: #A09CA8;
+    --blue: #45436C;
+}
+
+.board {
+    aspect-ratio: 1;
+    height: 20rem;
+
+    display: grid;
+    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+    align-items: stretch;
+    justify-items: stretch;
+
+    background-color: var(--blue);
+    border: thick double var(--white)
+}
+
+.board .cell {
+    font-weight: bold;
+    font-size: 2rem;
+
+    align-content: center;
+    text-align: center;
+}
+
+.board .cell:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.board .cell:nth-child(3n - 1) {
+    border-left: solid var(--grey);
+    border-right: solid var(--grey);
+}
+
+.board .cell:nth-child(n+4):nth-child(-n+6) {
+    border-top: solid var(--grey);
+    border-bottom: solid var(--grey);
+}
+
+#player {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: larger;
+}
+#player:before {
+    content: "Player: ";
+}
+
+/*  */
+body {
+    box-sizing: border-box;
+
+    margin: 0;
+    padding: 1rem;
+    height: 100vh;
+
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    justify-content: center;
+
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    background-color: var(--red);
+    color: var(--white);
+}
+
+h1 {
+    text-align: center;
+}

@@ -1,5 +1,5 @@
 const Gameboard = function () {
-    const board = [
+    let board = [
         [null, null, null],
         [null, null, null],
         [null, null, null]
@@ -54,6 +54,9 @@ const Gameboard = function () {
         const diagonal2Winner = checkSymbols(diagonal2Symbols);
         if (diagonal2Winner) return diagonal2Winner;
 
+        if (board.every(row => row.every(cell => cell !== null)))
+            return "draw";
+
         return false;
     }
 
@@ -61,38 +64,118 @@ const Gameboard = function () {
         return [...board];
     }
 
-    return { addSymbol, checkForWinner, getBoard };
+    function reset() {
+        board = [
+            [null, null, null],
+            [null, null, null],
+            [null, null, null]
+        ];
+    }
+
+    return { addSymbol, checkForWinner, getBoard, reset };
 }();
 
-const Game = function (gameboard) {
-    let isPlayer1Turn = false;
+const DisplayController = function (doc) {
+    function createCell(symbol) {
+        const cell = doc.createElement("span");
+        cell.textContent = symbol;
+        cell.classList.add("cell");
+        return cell
+    }
 
-    function getState() {
-        return {
-            winner: gameboard.checkForWinner(),
-            board: gameboard.getBoard(),
+    function updateBoardElement(board) {
+        if (!board)
+            board = [
+                [null, null, null],
+                [null, null, null],
+                [null, null, null]
+            ];
+
+        const boardElement = doc.createElement("div");
+        boardElement.classList.add("board");
+
+        for (let row = 0; row < 3; row++) {
+            for (let column = 0; column < 3; column++) {
+                const symbol = board[row][column];
+                const cell = createCell(symbol);
+                cell.dataset.row = row;
+                cell.dataset.column = column;
+
+                boardElement.appendChild(cell);
+            }
         }
+
+        doc.querySelector(".board")?.remove();
+        doc.body.appendChild(boardElement);
+
+        return boardElement;
+    }
+
+    function updatePlayer(symbol) {
+        const playerElement = doc.querySelector("#player")
+        playerElement.textContent = symbol; 
+    }
+
+    return { updateBoardElement, updatePlayer };
+}(document);
+
+const Game = function (gameboard, display) {
+    let player = "X";
+
+    function start() {
+        gameboard.reset();
+        display.updatePlayer(player);
+        const boardElement = display.updateBoardElement(gameboard.getBoard());
+        boardElement.addEventListener("click", e => {
+            const cellElement = e.target;
+            if (!cellElement.classList.contains("cell")) {
+                return;
+            }
+
+            const row = cellElement.dataset.row;
+            const column = cellElement.dataset.column;
+
+            cellElement.textContent = getPlayer();
+            play(row, column);
+        });
     }
 
     function play(row, column) {
-        const symbol = isPlayer1Turn ? "X" : "O";
-
-        const success = Gameboard.addSymbol(row, column, symbol);
+        const success = gameboard.addSymbol(row, column, player);
         if (!success) {
             console.error("Error placing symbol. Aborting turn...");
             return;
         }
-        
-        const gameState = getState();
-        if (gameState.winner) {
-            console.log(`Winner: ${gameState.winner}`);
+
+        const winner = gameboard.checkForWinner();
+        if (winner) {
+            setTimeout(() => {
+                alert(`Winner: ${winner}`)
+                start();
+            }, 0);
+            return;
         }
 
-        isPlayer1Turn = !isPlayer1Turn;
-        console.log(`PLAYER: ${isPlayer1Turn ? "X" : "O"}`);
-        return gameState.board;
+        player = player === "X" ? "O" : "X";
+        display.updatePlayer(player);
     }
 
+    function getPlayer() {
+        return player;
+    }
 
-    return { play, getState };
-}(Gameboard);
+    return { start, play, getPlayer };
+}(Gameboard, DisplayController);
+
+const body = document.querySelector("body")
+
+// Game.play(0, 1);
+// Game.play(0, 2);
+// Game.play(0, 0);
+// Game.play(1, 0);
+// Game.play(2, 2);
+// Game.play(2, 1);
+// document.querySelector("body").appendChild(DisplayController.createBoardElement(Gameboard.getBoard()))
+
+Game.start();
+
