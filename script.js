@@ -113,7 +113,7 @@ const DisplayController = function (doc) {
 
     function updatePlayer(symbol) {
         const playerElement = doc.querySelector("#player")
-        playerElement.textContent = symbol; 
+        playerElement.textContent = symbol;
     }
 
     return { updateBoardElement, updatePlayer };
@@ -124,13 +124,17 @@ const Game = function (gameboard, display) {
 
     function start() {
         gameboard.reset();
+
+        player = "X";
         display.updatePlayer(player);
+        
         const boardElement = display.updateBoardElement(gameboard.getBoard());
         boardElement.addEventListener("click", e => {
             const cellElement = e.target;
-            if (!cellElement.classList.contains("cell")) {
+            if (!cellElement.classList.contains("cell"))
                 return;
-            }
+            if (cellElement.textContent !== "")
+                return;
 
             const row = cellElement.dataset.row;
             const column = cellElement.dataset.column;
@@ -167,7 +171,8 @@ const Game = function (gameboard, display) {
     return { start, play, getPlayer };
 }(Gameboard, DisplayController);
 
-const body = document.querySelector("body")
+const resetButton = document.querySelector("#reset-button");
+resetButton.addEventListener("click", Game.start);
 
 // Game.play(0, 1);
 // Game.play(0, 2);
